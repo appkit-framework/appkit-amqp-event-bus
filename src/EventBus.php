@@ -189,7 +189,8 @@ class EventBus implements StartStopInterface, HealthIndicatorInterface {
                 throw new EventBusException($error, previous: $e);
             }
 
-            $unsubData['exchange'] = $exchange;
+            if(! $persistent)
+                $unsubData['exchange'] = $exchange;
 
             try {
                 $routingKey = "${appId}_$event";
@@ -225,7 +226,8 @@ class EventBus implements StartStopInterface, HealthIndicatorInterface {
                 throw new EventBusException($error, previous: $e);
             }
 
-            $unsubData['queue'] = $queue;
+            if(! $persistent)
+                $unsubData['queue'] = $queue;
 
             try {
                 $logMsg = "$queue to exchange $exchange";
@@ -260,11 +262,13 @@ class EventBus implements StartStopInterface, HealthIndicatorInterface {
 
             $unsubData['ctag'] = $ctag;
         } catch(EventBusException $e) {
-            try {
-                $this -> unsubInternal($unsubData);
-                $this -> log -> debug("Rolled back subscription $subTag");
-            } catch(EventBusException $e) {
-                $this -> log -> error("Failed to rollback subscription $subTag", $e);
+            if(!empty($unsubData)) {
+                try {
+                    $this -> unsubInternal($unsubData);
+                    $this -> log -> debug("Rolled back subscription $subTag");
+                } catch(EventBusException $e) {
+                    $this -> log -> error("Failed to rollback subscription $subTag", $e);
+                }
             }
             throw $e;
         }
