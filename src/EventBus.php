@@ -189,9 +189,6 @@ class EventBus implements StartStopInterface, HealthIndicatorInterface {
                 throw new EventBusException($error, previous: $e);
             }
 
-            if(! $persistent)
-                $unsubData['exchange'] = $exchange;
-
             try {
                 $routingKey = "${appId}_$event";
                 $logMsg = "$exchange to " . self::AMQP_PREFIX . " by routing key $routingKey";
@@ -297,18 +294,6 @@ class EventBus implements StartStopInterface, HealthIndicatorInterface {
             } catch(Throwable $e) {
                 $error = "Failed to delete queue";
                 $this -> log -> error("$error $queue", $e);
-                throw new EventBusException($error, previous: $e);
-            }
-        }
-
-        if(isset($unsubData['exchange'])) {
-            $exchange = $unsubData['exchange'];
-            try {
-                $this -> amqp -> deleteExchange($exchange);
-                $this -> log -> debug("Deleted exchange $exchange");
-            } catch(Throwable $e) {
-                $error = "Failed to delete exchange";
-                $this -> log -> error("$error $exchange", $e);
                 throw new EventBusException($error, previous: $e);
             }
         }
