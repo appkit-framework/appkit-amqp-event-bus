@@ -28,7 +28,7 @@ class EventBus implements StartStopInterface, HealthIndicatorInterface {
         $this -> appId = $appId;
         $this -> amqp = $amqp;
 
-        $this -> log = $log -> withModule($this);
+        $this -> log = $log -> withModule(static::class);
         $this -> instanceId = bin2hex(random_bytes(8));
     }
 
